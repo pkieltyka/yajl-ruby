@@ -176,11 +176,6 @@ void yajl_encode_part(void * wrapper, VALUE obj, VALUE io) {
             }
             status = yajl_gen_number(w->encoder, cptr, len);
             break;
-        case T_STRING:
-            cptr = RSTRING_PTR(obj);
-            len = RSTRING_LEN(obj);
-            status = yajl_gen_string(w->encoder, (const unsigned char *)cptr, len);
-            break;
         default:
             if (rb_respond_to(obj, intern_to_json)) {
                 str = rb_funcall(obj, intern_to_json, 0);
@@ -188,7 +183,11 @@ void yajl_encode_part(void * wrapper, VALUE obj, VALUE io) {
                 len = RSTRING_LEN(str);
                 status = yajl_gen_number(w->encoder, cptr, len);
             } else {
-                str = rb_funcall(obj, intern_to_s, 0);
+                if (TYPE(obj) != T_STRING) {
+                    str = rb_funcall(obj, intern_to_s, 0);
+                }else {
+                    str = obj;
+                }
                 cptr = RSTRING_PTR(str);
                 len = RSTRING_LEN(str);
                 status = yajl_gen_string(w->encoder, (const unsigned char *)cptr, len);
